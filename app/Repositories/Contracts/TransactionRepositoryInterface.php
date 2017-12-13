@@ -4,6 +4,7 @@ namespace App\Repositories\Contracts;
 
 use App\Models\Transaction;
 use App\Models\User;
+use Illuminate\Http\Request;
 
 interface TransactionRepositoryInterface
 {
@@ -12,8 +13,6 @@ interface TransactionRepositoryInterface
     public function validate(array $data);
 
     public function create(array $attributes);
-
-    public function getByUser();
 
     /**
      * @param string|null $from (example: '2017-11-01'])
@@ -26,6 +25,14 @@ interface TransactionRepositoryInterface
      * @param User $user
      * @return Transaction
      */
-    public function getLastTransaction($user = null) :Transaction;
+    public function getLastTransaction($user = null);
+
+    /**
+     * @param Request $request
+     * @param string $groupBy
+     * @return array
+     * @throws \Exception
+     */
+    public function getGroupedBy(Request $request, $groupBy) :array;
 
 }

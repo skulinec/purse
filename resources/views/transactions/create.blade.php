@@ -13,14 +13,16 @@
         <div class="col-md-5 col-md-offset-3">
             <div class="panel panel-default">
                 <div class="panel-heading">За месяц: <b id="js-amount">{{ $userExpensesByMonth }}</b> грн.</div>
-                <div class="panel-heading">
-                    <spsn class="pull-left">Последняя транакция:&nbsp;</spsn>
-                    <div id="js-last-transaction">
-                        <b>{{ $lastTransaction->amount }}</b> грн.
-                        <span class="text-muted">{{ $lastTransaction->getType() }}</span>
-                        <small>{{ date('d.m.Y', strtotime($lastTransaction->date)) }}</small>
+                @if (!empty($lastTransaction))
+                    <div class="panel-heading">
+                        <spsn class="pull-left">Последняя трансакция:&nbsp;</spsn>
+                        <div id="js-last-transaction">
+                            <b>{{ $lastTransaction->amount }}</b> грн.
+                            <span class="text-muted">{{ $lastTransaction->getType() }}</span>
+                            <small>{{ date('d.m.Y', strtotime($lastTransaction->date)) }}</small>
+                        </div>
                     </div>
-                </div>
+                @endif
 
                 <div class="panel-body">
 

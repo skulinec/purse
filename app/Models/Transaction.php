@@ -51,7 +51,9 @@ class Transaction extends Model
 
     public function scopeExpenses($query)
     {
-        return $query->where('amount', '<', 0);
+        $transactionTable = $this->getTable();
+
+        return $query->where("$transactionTable.amount", '<', 0);
     }
 
     /**
@@ -59,13 +61,31 @@ class Transaction extends Model
      * @param User $user
      * @return Builder
      */
-    public function scopeByUser($query, $user = null)
+    public function scopeByUser($query, User $user = null)
     {
         if (!$user) {
             $user = Auth::user();
         }
+        $transactionTable = $this->getTable();
 
-        return $query->where('user_id', $user->id);
+        return $query->where("$transactionTable.user_id", $user->id);
+    }
+
+    /**
+     * @param Builder $query
+     * @return Builder
+     */
+    public function scopeByFamily($query)
+    {
+        $familyId = Auth::user()->family_id;
+
+        if (!empty($familyId)) {
+            return $query->whereHas('user', function ($query) use ($familyId) {
+                $query->where('family_id', $familyId);
+            });
+        } else {
+            return $query->byUser();
+        }
     }
 
     /**
@@ -75,6 +95,15 @@ class Transaction extends Model
     public function type()
     {
         return $this->HasOne(Dictionary::class, 'id', 'type_dictionary_id');
+    }
+
+    /**
+     * Relation
+     * @return \Illuminate\Database\Eloquent\Relations\belongsTo
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'id');
     }
 
     /**

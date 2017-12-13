@@ -16,6 +16,8 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('transactions', ['uses' => 'TransactionController@index'])->name('transactions');
     Route::post('transactions', ['uses' => 'TransactionController@store'])->name('transactions.store');
     Route::delete('transactions/{transaction}', ['uses' => 'TransactionController@destroy'])->name('transactions.destroy');
+
+    Route::get('reports', ['uses' => 'ReportController@index'])->name('reports');
 });
 
 // Authentication Routes...

@@ -76,6 +76,8 @@ class AddTransactionsAndDictionariesTables extends Migration
      */
     public function down()
     {
-        //
+        DB::statement("DROP TABLE transactions");
+        DB::statement("DROP TABLE dictionaries");
+        DB::statement("DROP TABLE dictionary_types");
     }
 }

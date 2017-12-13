@@ -2,8 +2,13 @@
 
 namespace App\Repositories;
 
+use App\Criteria\ExpensesCriteria;
+use App\Criteria\TransactionByUserCriteria;
+use App\Criteria\TransactionReportsCriteria;
+use App\Models\User;
 use App\Repositories\Contracts\TransactionRepositoryInterface;
 use Auth;
+use Illuminate\Http\Request;
 use Validator;
 use App\Models\Transaction;
 use Prettus\Repository\Eloquent\BaseRepository;
@@ -34,14 +39,6 @@ class TransactionRepository extends BaseRepository implements TransactionReposit
         parent::create($attributes);
     }
 
-    public function getByUser()
-    {
-        return $this->model
-            ->byUser()
-            ->orderBy('date', 'DESC')
-            ->orderBy('id', 'DESC');
-    }
-
     /**
      * @param string|null $from (example: '2017-11-01'])
      * @param string|null $to (example: '2017-11-30'])
@@ -49,23 +46,19 @@ class TransactionRepository extends BaseRepository implements TransactionReposit
      */
     public function getUserExpensesByPeriod($from = null, $to = null) :array
     {
-        if (!$from || !$to || !strtotime($from) || !strtotime($to)) {
-            $from = date('Y-m-01');
-            $to   = date('Y-m-d', strtotime('last day of this month'));
-        }
+        $this->pushCriteria(new TransactionByUserCriteria(Auth::user()));
+        $this->pushCriteria(new ExpensesCriteria($from, $to));
 
         $result = [
             'total'        => 0,
-            'transactions' => $this->getByUser()
-                ->expenses()
-                ->where('date', '>=', $from)
-                ->where('date', '<=', $to)
-                ->get()
+            'transactions' => $this->get()
         ];
 
         foreach ($result['transactions'] as $transaction) {
             $result['total'] = $result['total'] + $transaction->amount;
         }
+
+        $this->resetCriteria();
 
         return $result;
     }
@@ -74,12 +67,32 @@ class TransactionRepository extends BaseRepository implements TransactionReposit
      * @param User $user
      * @return Transaction
      */
-    public function getLastTransaction($user = null) :Transaction
+    public function getLastTransaction($user = null)
     {
-        return $this->model
-            ->byUser($user)
-            ->orderBy('id', 'DESC')
-            ->first();
+        $this->pushCriteria(new TransactionByUserCriteria(Auth::user(), ['id' => 'DESC']));
+
+        $transaction = $this->first();
+
+        $this->resetCriteria();
+
+        return $transaction;
+    }
+
+    /**
+     * @param Request $request
+     * @param string $groupBy
+     * @return array
+     * @throws \Exception
+     */
+    public function getGroupedBy(Request $request, $groupBy) :array
+    {
+        $this->pushCriteria(new TransactionReportsCriteria($request, $groupBy));
+
+        $data = $this->get()->toArray();
+
+        $this->resetCriteria();
+
+        return $data;
     }
 
 }

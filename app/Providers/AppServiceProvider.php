@@ -2,9 +2,11 @@
 
 namespace App\Providers;
 
+use App\Repositories\Contracts\FamilyRepositoryInterface;
 use App\Repositories\Contracts\TransactionRepositoryInterface;
 use App\Repositories\DictionaryRepository;
 use App\Repositories\Contracts\DictionaryRepositoryInterface;
+use App\Repositories\FamilyRepository;
 use App\Repositories\TransactionRepository;
 use App\Services\Contracts\DictionaryServiceInterface;
 use App\Services\DictionaryService;
@@ -28,6 +30,7 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->singleton(DictionaryRepositoryInterface::class, DictionaryRepository::class);
         $this->app->singleton(TransactionRepositoryInterface::class, TransactionRepository::class);
+        $this->app->singleton(FamilyRepositoryInterface::class, FamilyRepository::class);
 
         $this->app->singleton(DictionaryServiceInterface::class, function ($app) {
             return new DictionaryService($app->make(DictionaryRepositoryInterface::class));

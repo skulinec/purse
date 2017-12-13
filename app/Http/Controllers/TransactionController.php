@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Criteria\TransactionByUserCriteria;
 use App\Http\Requests\CreateTransactionRequest;
 use App\Models\DictionaryType;
 use App\Models\Transaction;
 use App\Repositories\Contracts\TransactionRepositoryInterface;
+use App\Repositories\TransactionRepository;
 use App\Services\Contracts\DictionaryServiceInterface;
 use Illuminate\Http\Request;
 use Auth;
@@ -13,6 +15,7 @@ use Auth;
 class TransactionController extends Controller
 {
     protected $dictionaries;
+    /** @var TransactionRepository $transactionRepository */
     protected $transactionRepository;
 
     public function __construct(
@@ -28,9 +31,8 @@ class TransactionController extends Controller
      */
     public function index()
     {
-        $transactions = $this->transactionRepository
-            ->getByUser()
-            ->paginate(50);
+        $this->transactionRepository->pushCriteria(new TransactionByUserCriteria(Auth::user()));
+        $transactions = $this->transactionRepository->paginate(50);
 
         return view('transactions.list', compact('transactions'));
     }
